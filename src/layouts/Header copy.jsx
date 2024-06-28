@@ -24,19 +24,22 @@ function Header() {
   const { user, logout } = useAuth();
 
   const hdlLogout = () => {
-    // alert('bye')
+    alert("bye");
     logout();
   };
   return (
-    <div className="flex justify-between border-b-2">
-      <div className="flex ms-2 items-center gap-5">
-        <p className="text-xl">Hello, {user ? user.firstname : "Guest"}</p>
-        <input
-          type="checkbox"
-          value="light"
-          className="toggle theme-controller"
-        />
+    <div className="flex justify-between p-4">
+      <div className="flex gap-x-4 list-none">
+        <p className="font-bold">Hi,{user?.firstname}</p>
+        <li>
+          <input
+            type="checkbox"
+            value="light"
+            className="toggle theme-controller"
+          />
+        </li>
       </div>
+
       <ul className="menu menu-horizontal bg-base-200 rounded-box">
         {finalNav(user).map((el) => (
           <li key={el.to}>

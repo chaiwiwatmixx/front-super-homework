@@ -4,6 +4,9 @@
 @tailwind utilities;
 
 
-.myapp {
+/* .myapp {
   @apply max-w-screen-xl min-h-screen mx-auto flex flex-col gap-3 bg-pink-200
+} */
+.myapp {
+  @apply max-w-screen-xl min-h-screen mx-auto flex flex-col gap-3
 }
