@@ -1,26 +1,12 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
-
-const subjectApi = axios.create({
-  baseURL: "http://localhost:8888/subject",
-});
-
-const homeworkApi = axios.create({
-  baseURL: "http://localhost:8888/homework",
-});
+import { useNavigate } from "react-router-dom";
 
 function HomeworkForm() {
-  homeworkApi.interceptors.request.use((req) => {
-    // console.log('homeworkApi request...', req)
-    req.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
-    return req;
-  });
-
   const navigate = useNavigate();
   const [input, setInput] = useState({
     question: "",
@@ -29,20 +15,12 @@ function HomeworkForm() {
     published: false,
     subject_id: "",
   });
-  const [subject, setSubject] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [startDate, setStartDate] = useState(new Date());
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        // const rs = await axios.get('http://localhost:8888/subject')
-        const rs = await subjectApi.get("/");
-        setSubject(rs.data.subject);
-      } catch (err) {
-        console.log(err.message);
-      }
-    };
-    run();
-  }, []);
+  //   const {subject} = subjects
+
+  //   console.log("subject = ", subjects);
 
   const hdlChange = (e) => {
     setInput((prv) => ({ ...prv, [e.target.name]: e.target.value }));
@@ -52,14 +30,34 @@ function HomeworkForm() {
     try {
       e.preventDefault();
       const token = localStorage.getItem("token");
-      const rs = await homeworkApi.post("/", input);
-      console.log(rs);
-      alert("Homework created");
+      const rs = await axios.post("http://localhost:8888/homework", input, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      //   console.log(rs);
+      alert("create ok");
       navigate("/");
     } catch (err) {
-      console.log(err.message);
+      alert(JSON.stringify(err));
     }
   };
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        console.log("useEffect");
+        const token = localStorage.getItem("token");
+        const rs = await axios.get("http://localhost:8888/homework", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // console.log("rs = ", rs)
+        setSubjects(rs.data.homeworks);
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+    run();
+  }, []);
+
   return (
     <div className="border w-4/6 min-w-[600px] flex flex-col gap-3 mx-auto p-3">
       <h1 className="text-2xl">New Homework</h1>
@@ -77,15 +75,11 @@ function HomeworkForm() {
             <option disabled value={""}>
               Pick one
             </option>
-            {subject.map((el) => (
-              <option key={el.id} value={el.id}>
-                {el.title}
+            {subjects.map((subject) => (
+              <option key={subject.subject.id} value={subject.subject.id}>
+                {subject.subject.title}
               </option>
             ))}
-
-            {/* <option value={1}>HTML</option>
-            <option value={2}>CSS</option>
-            <option value={3}>Javascript</option> */}
           </select>
         </label>
         <textarea

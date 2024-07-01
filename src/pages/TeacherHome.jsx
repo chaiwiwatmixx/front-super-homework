@@ -1,28 +1,62 @@
-import CardHomeWork from "../components/CardHomeWork";
+/* eslint-disable no-unused-vars */
+import axios from "axios";
+import { useState, useEffect } from "react";
+import HomeworkCard from "../componects/HomeworkCard";
+import Modal from "../componects/Modal";
+import HomeworkEditForm from "../componects/HomeworkEditForm";
 
-export default function TeacherHome() {
-  const homeworks = [
-    {
-      title: "HTML",
-      status: "delete",
-      startDate: "พฤ. 23 พ.ค. 2567",
-      dueDate: "พ. 22 พ.ค. 2567",
-      description: "How HTTP work?",
-    },
-    {
-      title: "CSS",
-      status: "delete",
-      startDate: "พฤ. 23 พ.ค. 2567",
-      dueDate: "ศ. 24 พ.ค. 2567",
-      description: "CSS stand for...?",
-    },
-  ];
+const homeworkApi = axios.create({
+  baseURL: "http://localhost:8888/homework",
+});
+
+function TeacherHome() {
+  homeworkApi.interceptors.request.use((req) => {
+    req.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+    return req;
+  });
+
+  const [homeworks, setHomework] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editData, setEditdata] = useState({});
+  // const el = homeworks[0];
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        const rs = await homeworkApi.get("/");
+        setHomework(rs.data.homeworks);
+      } catch (err) {
+        console.log(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+  }, []);
+
+  const openEdit = (el) => {
+    setEditdata(el);
+    document.getElementById("editform").showModal();
+  };
+
+  if (loading) {
+    return <p className="text-xl">Loading...</p>;
+  }
   return (
-    <div className="w-4/5 mx-auto mt-8">
-      <h1 className="text-xl text-center mb-4">All Homeworks</h1>
-      {homeworks.map((hw, index) => (
-        <CardHomeWork key={index} {...hw} />
+    <>
+      <h1 className="text-3xl text-center">Teacher Home</h1>
+
+      {homeworks.map((el) => (
+        <HomeworkCard key={el.id} el={el} openEdit={openEdit} />
       ))}
-    </div>
+
+      <Modal modal_id={"editform"}>
+        <HomeworkEditForm input={editData} setInput={setEditdata} />
+      </Modal>
+    </>
   );
 }
+
+export default TeacherHome;
